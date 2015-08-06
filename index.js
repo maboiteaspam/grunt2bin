@@ -5,7 +5,6 @@ module.exports = function (program) {
 
   var cwd = process.cwd()
 
-  var stack = new Error().stack.split('\n');stack.shift();stack.shift()
   var caller = getCallerLocation()
 
   var grunt = require('grunt')
