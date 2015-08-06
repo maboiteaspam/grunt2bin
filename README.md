@@ -1,30 +1,49 @@
 # grunt2bin
-to write
 
-## Installation
-Run the following commands to download and install the application:
+what if i could use the power of `grunt` with a global node package ?
 
-```sh
-$  clone https://github.com/maboiteaspam/grunt2bin grunt2bin
-$ cd grunt2bin
-$ npm install
+I think that could be great.
+
+I could take advantage of grunt power.
+
+But i would not have to install again and again the same modules in every project.
+
+Obviously, it can t be as personalized as regular grunt. Do i always need that much of power ?
+
+So here is module to do such thing.
+
+# usage
+
+Install grunt2bin as local dependency of your module.
+
+```npm i grunt2bin --save```
+
+For each `binary` where you want to use `grunt`
+
+```js
+#!/usr/bin/env node
+
+require('grunt2bin')(function(grunt, cwd){
+  // at that very moment
+  // the cwd has switched to your module location
+  grunt.initConfig({
+    'hello': {
+      options: {
+        'user': 'put your username here'
+      }
+    }
+  })
+  // in order to let you load your task regularly
+  grunt.loadTasks('tasks')
+  
+  // initialize the default the target
+  grunt.registerTask('default', ['hello'])
+  
+  // set the additional file to load within user's cwd.
+  grunt.setUserGruntfile('grunt-hello.js')
+})
 ```
 
-## Documentation
-
-
-
-
-## How to contribute
-
-1. File an issue in the repository, using the bug tracker, describing the
-   contribution you'd like to make. This will help us to get you started on the
-   right foot.
-2. Fork the project in your account and create a new branch:
-   `your-great-feature`.
-3. Commit your changes in that branch.
-4. Open a pull request, and reference the initial issue in the pull request
-   message.
 
 ## License
 See the [LICENSE](./LICENSE) file.

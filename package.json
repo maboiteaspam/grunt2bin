@@ -20,7 +20,8 @@
     "url": "https://github.com/maboiteaspam/grunt2bin/issues"
   },
   "dependencies": {
-    "commander": "^2.8.1"
+    "commander": "^2.8.1",
+    "grunt": "^0.4.5"
   },
   "devDependencies": {
     "should": "^7.0.2"
