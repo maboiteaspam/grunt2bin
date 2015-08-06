@@ -44,6 +44,8 @@ require('grunt2bin')(function(grunt, cwd){
 })
 ```
 
+See an example https://github.com/maboiteaspam/hello-grunt2bin
+
 
 ## License
 See the [LICENSE](./LICENSE) file.
