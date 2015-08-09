@@ -4,7 +4,3 @@
 *.log
 node_modules
 test/fixture
-
-.local.json
-
-.idea/
