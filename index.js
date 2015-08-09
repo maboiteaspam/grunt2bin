@@ -1,4 +1,5 @@
 var path = require('path')
+var fs = require('fs')
 
 module.exports = function (program) {
 
@@ -17,8 +18,12 @@ module.exports = function (program) {
   }
   program(grunt, cwd)
 
+  if (userGruntfile && !fs.existsSync(userGruntfile)) {
+    userGruntfile = mainGruntfile
+  }
+
   grunt.tasks('default', {
-    gruntfile: userGruntfile || mainGruntfile,
+    gruntfile: userGruntfile,
     base: cwd
   })
 }
