@@ -35,8 +35,8 @@ function getCallerLocation () {
   var caller = stack.shift().match(/\(([^)]+)\)$/)
   if (!caller || !caller.length) {
 
-    console.log('please report')
-    console.log(new Error().stack)
+    console.error('please report')
+    console.error(new Error().stack)
 
     throw 'that is so weird.'
   }
