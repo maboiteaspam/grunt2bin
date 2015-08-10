@@ -8,9 +8,25 @@ I could take advantage of grunt power.
 
 But i would not have to install again and again the same modules in every project.
 
-Obviously, it can t be as personalized as regular grunt. Do i always need that much of power ?
+Also, one binary could take advantage of it to mix both cli an grunt interface within the same package.
 
-So here is module to do such thing.
+Merge cli options with user defined settings via grunt is a mechanism 
+that can offer flexibility to manage various behavior of the program 
+depending on the current wd.
+
+
+__What is the drawback ?__ Well, there is a reason grunt team does not explore that way, 
+this module let you create situations where version dependency integrity 
+is broken.
+
+That is ain t so cool, _agreed_.
+
+Now there could be someway to workaround that 
+and still work with some safety guard to avoid most of the mess.
+
+I ll try to evaluate that with this module.
+
+Until then, here you go :
 
 # usage
 
