@@ -61,12 +61,47 @@ module.exports = function (program) {
   userGrunt && userGrunt.run(grunt, cwd)
 
   grunt.file.setBase(moduleLocation || caller)
-  grunt.tasks('default', {
+
+  grunt.option.init({
     gruntfile: mainGruntfile,
     base: cwd,
     verbose: !!process.argv.join(' ').match(/--verbose/),
     debug: !!process.argv.join(' ').match(/--debug/)
-  })
+  });
+
+  if (process.argv.join(' ').match(/--describe/)) {
+    var pkg = fs.existsSync(moduleLocation+'/package.json')
+      ? require(moduleLocation+'/package.json')
+      : {name: path.basename(caller), description: 'not provided'}
+    console.log(pkg.name)
+    console.log(pkg.description)
+    console.log('')
+    console.log('Tasks configured for this module:')
+    console.log('')
+    var topTasks = []
+    var task = grunt.task._tasks['default'];
+    if (task) {
+      if (task.info.match(/^Alias for .*/)) {
+        task.info
+          .replace(/^Alias for\s+/, '')
+          .replace(/\s+task[s]?[.]$/, '')
+          .split(',')
+          .forEach(function (aliased) {
+            topTasks.push(
+              aliased.replace(/\s+$/, '').replace(/^\s+/, '').replace(/"/g, '')
+            )
+          });
+      }
+    }
+    topTasks.forEach(function(name){
+      console.log(' - ' + name)
+      console.log('    ' + grunt.config.get('global.descriptions.'+name))
+    })
+    console.log('')
+  } else {
+    //run the task
+    grunt.tasks('default')
+  }
 }
 
 function getCallerLocation () {
