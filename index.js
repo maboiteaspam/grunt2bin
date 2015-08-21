@@ -25,6 +25,15 @@ module.exports = function (program) {
     }
   }
 
+  grunt.file.setBase(moduleLocation || caller)
+  program.config(grunt, cwd)
+
+  userGrunt && grunt.file.setBase(path.dirname(userGruntfile))
+  userGrunt && userGrunt.config(grunt, cwd)
+
+  grunt.file.setBase(moduleLocation || caller)
+  var main = program.run(grunt, cwd)
+
   var systemUserGrunt = null
   var systemUserGruntfile = null
   grunt.loadSystemUserGruntfile = function (what) {
@@ -41,24 +50,15 @@ module.exports = function (program) {
         }
         if (what.match(/run/)) {
           systemUserGrunt && grunt.file.setBase(path.dirname(systemUserGruntfile))
-          systemUserGrunt && systemUserGrunt.run(grunt, cwd)
+          systemUserGrunt && systemUserGrunt.run(main, grunt, cwd)
           grunt.file.setBase(userGruntfile)
         }
       }
     }
   }
 
-  grunt.file.setBase(moduleLocation || caller)
-  program.config(grunt, cwd)
-
   userGrunt && grunt.file.setBase(path.dirname(userGruntfile))
-  userGrunt && userGrunt.config(grunt, cwd)
-
-  grunt.file.setBase(moduleLocation || caller)
-  program.run(grunt, cwd)
-
-  userGrunt && grunt.file.setBase(path.dirname(userGruntfile))
-  userGrunt && userGrunt.run(grunt, cwd)
+  userGrunt && userGrunt.run(main, grunt, cwd)
 
   grunt.file.setBase(moduleLocation || caller)
 
@@ -69,21 +69,26 @@ module.exports = function (program) {
     debug: !!process.argv.join(' ').match(/--debug/)
   });
 
+  main.registerTo(grunt, 'default');
+
   if (process.argv.join(' ').match(/--describe/)) {
+
     var chalk = require('chalk')
     var pkg = fs.existsSync(moduleLocation+'/package.json')
       ? require(moduleLocation+'/package.json')
       : {name: path.basename(caller), description: 'not provided'}
+
     console.log(chalk.white.underline(pkg.name))
     console.log(pkg.description)
     console.log('')
     console.log('Tasks configured for this module:')
     console.log('')
+
     var topTask = grunt.task._tasks['default'];
     getAliasedTasks(topTask).forEach(function(name){
       var task = grunt.task._tasks[name];
       console.log(chalk.magenta(' -  ') + chalk.white.bold(name.toUpperCase()))
-      console.log('    ' + grunt.config.get('global.descriptions.'+name))
+      console.log('    ' + grunt.config.get('global.descriptions.'+name).replace(/(\n\s*)/g,'\n    '))
       console.log('    Alias of ')
       console.log(chalk.white('    ' + getAliasedTasks(task).join(', ')))
       console.log('')
@@ -105,6 +110,7 @@ module.exports = function (program) {
       }
       return aliasedTasks
     }
+
   } else {
     //run the task
     grunt.tasks('default')
