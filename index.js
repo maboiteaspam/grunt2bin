@@ -70,34 +70,41 @@ module.exports = function (program) {
   });
 
   if (process.argv.join(' ').match(/--describe/)) {
+    var chalk = require('chalk')
     var pkg = fs.existsSync(moduleLocation+'/package.json')
       ? require(moduleLocation+'/package.json')
       : {name: path.basename(caller), description: 'not provided'}
-    console.log(pkg.name)
+    console.log(chalk.white.underline(pkg.name))
     console.log(pkg.description)
     console.log('')
     console.log('Tasks configured for this module:')
     console.log('')
-    var topTasks = []
-    var task = grunt.task._tasks['default'];
-    if (task) {
+    var topTask = grunt.task._tasks['default'];
+    getAliasedTasks(topTask).forEach(function(name){
+      var task = grunt.task._tasks[name];
+      console.log(chalk.magenta(' -  ') + chalk.white.bold(name.toUpperCase()))
+      console.log('    ' + grunt.config.get('global.descriptions.'+name))
+      console.log('    Alias of ')
+      console.log(chalk.white('    ' + getAliasedTasks(task).join(', ')))
+      console.log('')
+    })
+    console.log('')
+
+    function getAliasedTasks (task) {
+      var aliasedTasks = []
       if (task.info.match(/^Alias for .*/)) {
         task.info
           .replace(/^Alias for\s+/, '')
           .replace(/\s+task[s]?[.]$/, '')
           .split(',')
           .forEach(function (aliased) {
-            topTasks.push(
+            aliasedTasks.push(
               aliased.replace(/\s+$/, '').replace(/^\s+/, '').replace(/"/g, '')
             )
           });
       }
+      return aliasedTasks
     }
-    topTasks.forEach(function(name){
-      console.log(' - ' + name)
-      console.log('    ' + grunt.config.get('global.descriptions.'+name))
-    })
-    console.log('')
   } else {
     //run the task
     grunt.tasks('default')
