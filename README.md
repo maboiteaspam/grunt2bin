@@ -39,24 +39,32 @@ For each `binary` where you want to use `grunt`
 ```js
 #!/usr/bin/env node
 
-require('grunt2bin')(function(grunt, cwd){
-  // at that very moment
-  // the cwd has switched to your module location
-  grunt.initConfig({
-    'hello': {
-      options: {
-        'user': 'put your username here'
-      }
-    }
-  })
-  // in order to let you load your task regularly
-  grunt.loadTasks('tasks')
+var grunt2bin = require('grunt2bin')
+var TasksWorkflow = grunt2bin.TasksWorkflow
+
+grunt2bin.handleProgram({
+  // This function expects
+  // an Object with two keys.
   
-  // initialize the default the target
-  grunt.registerTask('default', ['hello'])
+  // config: To initialize the grunt config
+  config: function(grunt, cwd){
+    grunt.initConfig({
+      'user': ''
+    })
+    // load my super tasks
+    grunt.loadTasks('tasks')
+    grunt.setUserGruntfile('grunt-hello.js')
+  },
   
-  // set the additional file to load within user's cwd.
-  grunt.setUserGruntfile('grunt-hello.js')
+  // run: To initialize the tasks workflow.
+  run: function(main, grunt, cwd){
+    TasksWorkflow()
+      .appendTask( TasksWorkflow.createTask('confirm_username'))
+      .appendTask( TasksWorkflow.createTask('hello'))
+      .packToTask('welcome',
+      'Welcome user needs to get his user name first !`.'
+    ).appendTo(main);
+  }
 })
 ```
 

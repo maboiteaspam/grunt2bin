@@ -6,9 +6,6 @@
   "scripts": {},
   "bin": {},
   "keywords": [
-    "To",
-    "be",
-    "done"
   ],
   "author": "maboiteaspam",
   "license": "WTF",
@@ -22,6 +19,7 @@
   "dependencies": {
     "chalk": "^1.1.1",
     "grunt": "^0.4.5",
+    "minimist": "^1.1.3",
     "osenv": "^0.1.3"
   },
   "devDependencies": {}
