@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {},
   "bin": {},
-  "keywords": [
-  ],
+  "keywords": [],
   "author": "maboiteaspam",
   "license": "WTF",
   "homepage": "https://github.com/maboiteaspam/grunt2bin#readme",
@@ -20,7 +19,8 @@
     "chalk": "^1.1.1",
     "grunt": "^0.4.5",
     "minimist": "^1.1.3",
-    "osenv": "^0.1.3"
+    "osenv": "^0.1.3",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {}
 }

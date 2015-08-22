@@ -2,7 +2,7 @@ var path = require('path')
 var fs = require('fs')
 var osenv = require('osenv')
 var argv = require('minimist')(process.argv.slice(2));
-var TasksWorkflow = require('../lib/tasks-workflow.js')
+var TasksWorkflow = require('./lib/tasks-workflow.js')
 
 //region main
 function handleProgram(program){
