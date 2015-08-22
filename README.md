@@ -1,19 +1,14 @@
 # grunt2bin
 
-what if i could use the power of `grunt` with a global node package ?
+Helper to use `grunt` with a node `binary` package.
 
-I think that could be great.
+It helps to take advantage of `grunt` power when you creates globally installed node package.
 
-I could take advantage of grunt power.
+Provide a default configuration and a default workflow based on grunt.
 
-But i would not have to install again and again the same modules in every project.
+Let `grunt2bin` provides the interfaces required by your end user to hack and configure your program.
 
-Also, one binary could take advantage of it to mix both cli an grunt interface within the same package.
-
-Merge cli options with user defined settings via grunt is a mechanism 
-that can offer flexibility to manage various behavior of the program 
-depending on the current wd.
-
+Configuration and workflow can be overridden per folder and or per system user.
 
 __What is the drawback ?__ Well, there is a reason grunt team does not explore that way, 
 this module let you create situations where version dependency integrity 
