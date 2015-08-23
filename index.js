@@ -31,11 +31,7 @@ function handleProgram(program){
   program.config(grunt, cwd)
 
   userGrunt && grunt.file.setBase(path.dirname(userGruntfile))
-  userGrunt && userGrunt.config(grunt, cwd)
-
-  var main = new TasksWorkflow()
-  grunt.file.setBase(moduleLocation || caller)
-  program.run(main, grunt, cwd)
+  userGrunt && userGrunt.config && userGrunt.config(grunt, cwd)
 
   var systemUserGrunt = null
   var systemUserGruntfile = null
@@ -43,25 +39,39 @@ function handleProgram(program){
     // can/must be called only from userGruntfile.
     what = what || 'config run'
     if (userGruntfileName) {
-      systemUserGruntfile = path.join(osenv.home(), userGruntfileName, 'index.js')
+      var p = path.basename(userGruntfileName, path.extname(userGruntfileName))
+      p = path.join(osenv.home(), p)
+      systemUserGruntfile = path.join(p, 'index.js')
       if (fs.existsSync(systemUserGruntfile)) {
         systemUserGrunt = require(systemUserGruntfile)
         if (what.match(/config/)) {
           systemUserGrunt && grunt.file.setBase(path.dirname(systemUserGruntfile))
-          systemUserGrunt && systemUserGrunt.config(grunt, cwd)
-          grunt.file.setBase(userGruntfile)
+          systemUserGrunt && systemUserGrunt.config && systemUserGrunt.config(grunt, cwd)
+          grunt.file.setBase(path.dirname(userGruntfile))
         }
         if (what.match(/run/)) {
           systemUserGrunt && grunt.file.setBase(path.dirname(systemUserGruntfile))
-          systemUserGrunt && systemUserGrunt.run(main, grunt, cwd)
-          grunt.file.setBase(userGruntfile)
+          systemUserGrunt && systemUserGrunt.run && systemUserGrunt.run(main, grunt, cwd)
+          grunt.file.setBase(path.dirname(userGruntfile))
         }
       }
     }
   }
 
+  if (!userGrunt) {
+    grunt.loadSystemUserGruntfile('config')
+  }
+
+  var main = new TasksWorkflow()
+  grunt.file.setBase(moduleLocation || caller)
+  program.run(main, grunt, cwd)
+
   userGrunt && grunt.file.setBase(path.dirname(userGruntfile))
-  userGrunt && userGrunt.run(main, grunt, cwd)
+  userGrunt && userGrunt.run && userGrunt.run(main, grunt, cwd)
+
+  if (!userGrunt) {
+    grunt.loadSystemUserGruntfile('run')
+  }
 
   grunt.file.setBase(moduleLocation || caller)
 
