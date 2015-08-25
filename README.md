@@ -35,7 +35,7 @@ For each `binary` where you want to use `grunt`
 #!/usr/bin/env node
 
 var grunt2bin = require('grunt2bin')
-var TasksWorkflow = grunt2bin.TasksWorkflow
+var TasksWorkflow = require('grunt2bin/lib/tasks-workflow.js')
 
 grunt2bin.handleProgram({
   // This function expects
