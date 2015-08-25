@@ -84,6 +84,15 @@ function handleProgram(program){
     debug: !!process.argv.join(' ').match(/--debug/)
   });
 
+  if (argv.only) {
+    main.forEach(function(task){
+      if (!task.name.match(argv.only)) {
+        main.removeTask(task.name)
+      } else {
+        console.log(task)
+      }
+    })
+  }
   main.registerTo(grunt, 'default');
 
   if (argv.describe) {
@@ -97,7 +106,8 @@ function handleProgram(program){
       gruntfile: mainGruntfile,
       base: cwd,
       verbose: !!process.argv.join(' ').match(/--verbose/),
-      debug: !!process.argv.join(' ').match(/--debug/)
+      debug: !!process.argv.join(' ').match(/--debug/),
+      force: !!process.argv.join(' ').match(/--force/)
     })
   }
 }
