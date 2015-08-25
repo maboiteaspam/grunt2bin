@@ -12,6 +12,7 @@ function handleProgram(program){
   var moduleLocation = findPackageFileAlongPath(caller)
 
   var grunt = require('grunt')
+  grunt.loadTasks(path.join(__dirname,'tasks'))
 
   var mainGruntfile = path.join(__dirname, 'Gruntfile.js');
 
