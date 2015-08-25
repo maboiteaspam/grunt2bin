@@ -89,8 +89,6 @@ function handleProgram(program){
     main.forEach(function(task){
       if (!task.name.match(argv.only)) {
         main.removeTask(task.name)
-      } else {
-        console.log(task)
       }
     })
   }
