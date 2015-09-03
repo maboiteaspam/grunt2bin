@@ -6,20 +6,64 @@ var argv = require('minimist')(process.argv.slice(2));
 var TasksWorkflow = require('./lib/tasks-workflow.js')
 
 //region main
-function handleProgram(program){
+/**
+ * Struct of a program.
+ * A software that offers
+ * a configuration handle
+ * and a run handle.
+ *
+ *
+ * @constructor
+ */
+function Program () {
+  /**
+   * Handle to configure grunt
+   * and load grunt tasks.
+   *
+   * @param grunt Grunt
+   * @param cwd String
+   */
+  this.config = function(grunt, cwd){}
+  /**
+   * Handle to create and change a
+   * grunt tasks workflow.
+   *
+   * @param main TasksWorkflow
+   * @param grunt Grunt
+   * @param cwd String
+   */
+  this.run = function(main, grunt, cwd){}
+}
+
+/**
+ * Handles a program execution
+ *
+ * @param program
+ */
+function handleProgram  (program) {
   var cwd = process.cwd()
 
-  var caller = getCallerLocation()
-  var moduleLocation = findPackageFileAlongPath(caller)
-
+  // load grunt and the tasks local to this module, if any.
   var grunt = require('grunt')
   if (fs.existsSync (path.join(__dirname, 'tasks')))
     grunt.loadTasks(path.join(__dirname, 'tasks'))
 
+  // Discover the path of the program implementing grunt2bin
+  var caller = getCallerLocation()
+  // it may be within a /lib/ or /bin/ folder within the module
+  // so we may need to search for its top level location where the package.json exists.
+  var moduleLocation = findPackageFileAlongPath(caller)
+  var modulePkg = fs.existsSync(moduleLocation+'/package.json')
+
+  // this is a stub for grunt.
+  // It requires a Gruntfile on cwd to run properly.
+  // (this is big headache)
   var mainGruntfile = path.join(__dirname, 'Gruntfile.js');
 
-  var userGruntfileName = null
-
+  // it lets the program defines a file name to load during execution.
+  // This file is located in current cwd.
+  // This is to be called from config handle of program invoker.
+  var userGruntfileName = modulePkg.name + '.js'
   var userGrunt = null
   var userGruntfile = null
   grunt.setUserGruntfile = function(u){
@@ -30,12 +74,20 @@ function handleProgram(program){
     }
   }
 
+  // program needs now to configure and load tasks
+  // into grunt.
+  // for that purpose, tasks loading,
+  // we shall ensure the cwd is set to module location.
   grunt.file.setBase(moduleLocation || caller)
   program.config(grunt, cwd)
 
-  userGrunt && grunt.file.setBase(path.dirname(userGruntfile))
-  userGrunt && userGrunt.config && userGrunt.config(grunt, cwd)
+  grunt.setUserGruntfile = null; // ? can do that ?
 
+
+  // Additionally, grunt2bin can help you to load
+  // a file located in the system user folder,
+  // something like $HOME.
+  //
   var systemUserGrunt = null
   var systemUserGruntfile = null
   grunt.loadSystemUserGruntfile = function (what) {
@@ -47,44 +99,70 @@ function handleProgram(program){
       systemUserGruntfile = path.join(p, 'index.js')
       if (fs.existsSync(systemUserGruntfile)) {
         systemUserGrunt = require(systemUserGruntfile)
-        if (what.match(/config/)) {
-          systemUserGrunt && grunt.file.setBase(path.dirname(systemUserGruntfile))
-          systemUserGrunt && systemUserGrunt.config && systemUserGrunt.config(grunt, cwd)
-          grunt.file.setBase(path.dirname(userGruntfile))
-        }
-        if (what.match(/run/)) {
-          systemUserGrunt && grunt.file.setBase(path.dirname(systemUserGruntfile))
-          systemUserGrunt && systemUserGrunt.run && systemUserGrunt.run(main, grunt, cwd)
-          grunt.file.setBase(path.dirname(userGruntfile))
-        }
       }
     }
+
+    if (what && systemUserGrunt) {
+      if (what.match(/config/)) {
+        systemUserGrunt && grunt.file.setBase(path.dirname(systemUserGruntfile))
+        systemUserGrunt && systemUserGrunt.config && systemUserGrunt.config(grunt, cwd)
+        grunt.file.setBase(path.dirname(userGruntfile))
+      }
+      if (what.match(/run/)) {
+        systemUserGrunt && grunt.file.setBase(path.dirname(systemUserGruntfile))
+        systemUserGrunt && systemUserGrunt.run && systemUserGrunt.run(main, grunt, cwd)
+        grunt.file.setBase(path.dirname(userGruntfile))
+      }
+    }
+
+    return systemUserGrunt
   }
 
+  // if there is no user grunt file within cwd
+  // to possibly load a system user grunt file,
+  // then grunt2bin will do that by default.
   if (!userGrunt) {
     grunt.loadSystemUserGruntfile('config')
+
+    // otherwise, up to the userGrunt to load it, or not.
+  } else if (userGrunt.config) {
+    // if a userGruntFile has been set and exists,
+    // apply the same behavior as program.
+    grunt.file.setBase(path.dirname(userGruntfile))
+    userGrunt.config(grunt, cwd)
   }
 
+  // main is a workflow to be injected into grunt later.
+  // it has helper methods to add / replace / remove / insert tasks.
   var main = new TasksWorkflow()
-  grunt.file.setBase(moduleLocation || caller)
+  grunt.file.setBase(moduleLocation || caller) // needed ?
+
+  // program will now execute,
+  // in fact nothing will really happens here
+  // excepts maybe temporary files setup, and some static system checks
+  // the purpose, in fact, is to build the tasks workflow.
+  // in other words provides task with targets and proper configuration
+  // to execute smoothly.
+  // the execution of the workflow is delayed to later
+  // and is entirely done by grunt.
   program.run(main, grunt, cwd)
 
-  userGrunt && grunt.file.setBase(path.dirname(userGruntfile))
-  userGrunt && userGrunt.run && userGrunt.run(main, grunt, cwd)
-
+  // if there is no user grunt file within cwd
+  // to possibly invoke the run handle of the system user file,
+  //grunt2bin will do it.
   if (!userGrunt) {
     grunt.loadSystemUserGruntfile('run')
+
+    // otherwise, up to the userGrunt to run it, or not.
+  } else if (userGrunt.run) {
+    grunt.file.setBase(path.dirname(userGruntfile)) // needed ?
+    userGrunt.run(main, grunt, cwd)
   }
 
-  grunt.file.setBase(moduleLocation || caller)
+  grunt.file.setBase(moduleLocation || caller) // needed ?
 
-  grunt.option.init({
-    gruntfile: mainGruntfile,
-    base: cwd,
-    verbose: !!process.argv.join(' ').match(/--verbose/),
-    debug: !!process.argv.join(' ').match(/--debug/)
-  });
-
+  // this command line options --only [task name]
+  // remove all tasks excepts those matching given name.
   if (argv.only) {
     main.forEach(function(task){
       if (!task.name.match(argv.only)) {
@@ -92,8 +170,36 @@ function handleProgram(program){
       }
     })
   }
+
+  //
+  // By now, the workflow is ready.
+  // the configuration is finalised.
+  //
+
+  // grunt will now be configured
+  // and made ready for execution.
+
+  // set some general defaults options.
+  grunt.option.init({
+    gruntfile: mainGruntfile, // stub.
+    base: cwd, // ensure we run into the cwd of the end user.
+    verbose: !!process.argv.join(' ').match(/--verbose/), // pass in some default options.
+    debug: !!process.argv.join(' ').match(/--debug/) // pass in some default options.
+  });
+
+  // translate the TasksWorkflow configuration
+  // into a grunt configuration.
+  // notes that it uses a different merge method than regular grunt.
+  // Arrays of data will be merged.
   main.registerTo(grunt, 'default');
 
+  // Instead of running the program,
+  // user may want to inspect it.
+  // --describe [something] interprets
+  // the grunt configuration and its tasks
+  // to display them in order.
+  // if tasks are found their description are shown.
+  // if targets are found their configuration are shown.
   if (argv.describe) {
     var pkg = fs.existsSync(moduleLocation+'/package.json')
       ? require(moduleLocation+'/package.json')
@@ -101,8 +207,10 @@ function handleProgram(program){
     gruntDescribe(grunt, pkg, argv.describe)
 
   } else {
+    // otherwise, lets run grunt now.
     //run the task
     grunt.tasks('default', {
+      // this is needed even it s duplicate.
       gruntfile: mainGruntfile,
       base: cwd,
       verbose: !!process.argv.join(' ').match(/--verbose/),
@@ -154,6 +262,7 @@ function findPackageFileAlongPath (p) {
 }
 //endregion
 
+// exports the stuff to let you use it.
 module.exports = {
   handleProgram: handleProgram,
   TasksWorkflow: TasksWorkflow
