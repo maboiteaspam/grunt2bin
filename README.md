@@ -10,19 +10,6 @@ Let `grunt2bin` provides the interfaces required by your end user to hack and co
 
 Configuration and workflow can be overridden per folder and or per system user.
 
-__What is the drawback ?__ Well, there is a reason grunt team does not explore that way, 
-this module let you create situations where version dependency integrity 
-is broken.
-
-That is ain t so cool, _agreed_.
-
-Now there could be someway to workaround that 
-and still work with some safety guard to avoid most of the mess.
-
-I ll try to evaluate that with this module.
-
-Until then, here you go :
-
 # usage
 
 Install grunt2bin as local dependency of your module.
@@ -38,6 +25,9 @@ var grunt2bin = require('grunt2bin')
 var TasksWorkflow = require('grunt2bin/lib/tasks-workflow.js')
 
 grunt2bin.handleProgram({
+
+  compat: '1.x.x',
+
   // This function expects
   // an Object with two keys.
   
@@ -63,7 +53,22 @@ grunt2bin.handleProgram({
 })
 ```
 
-See an example https://github.com/maboiteaspam/hello-grunt2bin
+# pre defined command line arguments
+
+`grunt2bin` handles several command line arguments out of the box.
+
+    --describe [task / target name]     Show help and description about tasks.
+    --only [task name]                  Keep tasks that match given name.
+    --edit [mine|this]                  Starts an editor to edit the Gruntfile 
+                                        located in $HOME or the cwd.
+    --verbose                           Configure grunt verbosity
+    --debug                             Configure grunt to more verbosity
+    --force                             Force grunt to keep going on error
+
+# examples
+
+- https://github.com/maboiteaspam/hello-grunt2bin
+- https://github.com/maboiteaspam/project-bin-node/tree/grunt2bin
 
 
 ## License

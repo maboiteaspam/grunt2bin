@@ -1,9 +1,12 @@
 var path = require('path')
-var fs = require('fs')
+var fs = require('fs-extra')
+var semver = require('semver')
 var osenv = require('osenv')
+var editors = require('editors')
 var gruntDescribe = require('grunt-describe')
 var argv = require('minimist')(process.argv.slice(2));
 var TasksWorkflow = require('./lib/tasks-workflow.js')
+var pkg = require('./package.json')
 
 //region main
 /**
@@ -54,23 +57,55 @@ function handleProgram  (program) {
   // so we may need to search for its top level location where the package.json exists.
   var moduleLocation = findPackageFileAlongPath(caller)
   var modulePkg = fs.existsSync(moduleLocation+'/package.json')
+    ? require(moduleLocation+'/package.json')
+    : {name: path.basename(caller), description: 'not provided', version: '0.0.0'}
+
+  var userGruntfileName = modulePkg.name + '.js'
+
+  // we starts and editor,
+  // to edit a Gruntfile
+  // if it does not exists,
+  // create it at first.
+  if (argv.edit) {
+    var pathToEdit = path.join(cwd, userGruntfileName)
+    if (argv.edit.match(/mine/)) {
+      pathToEdit = path.basename(userGruntfileName, path.extname(userGruntfileName))
+      pathToEdit = path.join(osenv.home(), pathToEdit)
+      pathToEdit = path.join(pathToEdit, 'index.js')
+    }
+
+    if (!fs.existsSync(pathToEdit)) {
+      var content = fs.readFileSync(__dirname + 'index-tpl.js')
+      var v = semver.major(modulePkg.version) + '.' + semver.minor(modulePkg.version) + '.x'
+
+      fs.mkdirsSync (path.dirname(pathToEdit))
+      fs.writeFileSync(pathToEdit, content.replace('x.x.x', v))
+    }
+
+    editors(pathToEdit, function (code, sig) {});
+    return;
+  }
 
   // this is a stub for grunt.
   // It requires a Gruntfile on cwd to run properly.
   // (this is big headache)
   var mainGruntfile = path.join(__dirname, 'Gruntfile.js');
 
-  // it lets the program defines a file name to load during execution.
-  // This file is located in current cwd.
-  // This is to be called from config handle of program invoker.
-  var userGruntfileName = modulePkg.name + '.js'
+  // load file on cwd to configure and update the tasks workflow.
   var userGrunt = null
   var userGruntfile = null
-  grunt.setUserGruntfile = function(u){
-    userGruntfileName = u
-    userGruntfile = path.join(cwd, u)
-    if (fs.existsSync(userGruntfile)) {
-      userGrunt = require(userGruntfile)
+  userGruntfile = path.join(cwd, userGruntfileName)
+  if (fs.existsSync(userGruntfile)) {
+    userGrunt = require(userGruntfile)
+
+    // check compatibility
+    if (userGrunt.compat) {
+      if (!semver.satisfies(modulePkg.version, userGrunt.compat)) {
+        throw 'Oops! Your user grunt file is compatible with ' + userGrunt.compat
+        + ', but ' + modulePkg.name +  ' version is ' + modulePkg.version
+        + '.\nYou should review the user grunt file '
+        + 'and update compat field accordingly.' ;
+      }
     }
   }
 
@@ -93,12 +128,24 @@ function handleProgram  (program) {
   grunt.loadSystemUserGruntfile = function (what) {
     // can/must be called only from userGruntfile.
     what = what || 'config run'
-    if (userGruntfileName) {
+    if (! systemUserGrunt && userGruntfileName) {
       var p = path.basename(userGruntfileName, path.extname(userGruntfileName))
       p = path.join(osenv.home(), p)
       systemUserGruntfile = path.join(p, 'index.js')
       if (fs.existsSync(systemUserGruntfile)) {
         systemUserGrunt = require(systemUserGruntfile)
+      }
+
+      if (systemUserGrunt) {
+        // check compatibility
+        if (systemUserGrunt.compat) {
+          if (!semver.satisfies(modulePkg.version, systemUserGrunt.compat)) {
+            throw 'Oops! Your user grunt file is compatible with ' + systemUserGrunt.compat
+            + ', but ' + modulePkg.name +  ' version is ' + modulePkg.version
+            + '.\nYou should review the user grunt file '
+            + 'and update compat field accordingly.' ;
+          }
+        }
       }
     }
 
@@ -183,8 +230,10 @@ function handleProgram  (program) {
   grunt.option.init({
     gruntfile: mainGruntfile, // stub.
     base: cwd, // ensure we run into the cwd of the end user.
-    verbose: !!process.argv.join(' ').match(/--verbose/), // pass in some default options.
-    debug: !!process.argv.join(' ').match(/--debug/) // pass in some default options.
+    // pass in some default options.
+    verbose: !!argv.verbose,
+    debug: !!argv.debug,
+    force: !!argv.force
   });
 
   // translate the TasksWorkflow configuration
@@ -201,10 +250,7 @@ function handleProgram  (program) {
   // if tasks are found their description are shown.
   // if targets are found their configuration are shown.
   if (argv.describe) {
-    var pkg = fs.existsSync(moduleLocation+'/package.json')
-      ? require(moduleLocation+'/package.json')
-      : {name: path.basename(caller), description: 'not provided'}
-    gruntDescribe(grunt, pkg, argv.describe)
+    gruntDescribe(grunt, modulePkg, argv.describe)
 
   } else {
     // otherwise, lets run grunt now.
@@ -213,9 +259,10 @@ function handleProgram  (program) {
       // this is needed even it s duplicate.
       gruntfile: mainGruntfile,
       base: cwd,
-      verbose: !!process.argv.join(' ').match(/--verbose/),
-      debug: !!process.argv.join(' ').match(/--debug/),
-      force: !!process.argv.join(' ').match(/--force/)
+      // pass in some default options.
+      verbose: !!argv.verbose,
+      debug: !!argv.debug,
+      force: !!argv.force
     })
   }
 }
