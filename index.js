@@ -77,14 +77,14 @@ function handleProgram  (program) {
   // create it at first.
   if (argv.edit) {
     var pathToEdit = path.join(cwd, userGruntfileName)
-    if (argv.edit.match(/mine/)) {
+    if ((argv.edit + '').match(/mine/)) {
       pathToEdit = path.basename(userGruntfileName, path.extname(userGruntfileName))
       pathToEdit = path.join(osenv.home(), pathToEdit)
       pathToEdit = path.join(pathToEdit, 'index.js')
     }
 
     if (!fs.existsSync(pathToEdit)) {
-      var content = fs.readFileSync(__dirname + 'index-tpl.js')
+      var content = fs.readFileSync(path.join(__dirname, 'index-tpl.js')).toString()
       var v = semver.major(modulePkg.version) + '.' + semver.minor(modulePkg.version) + '.x'
 
       fs.mkdirsSync (path.dirname(pathToEdit))
