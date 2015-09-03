@@ -26,10 +26,7 @@ var grunt2bin = require('grunt2bin')
 grunt2bin.handleProgram({
 
   // handleProgram expects
-  // an Object with three keys.
-
-  // compatible version with your program
-  compat: '1.x.x',
+  // an Object with two keys.
   
   // grunt config to initialize or update
   config: function(grunt, cwd){
@@ -71,6 +68,58 @@ grunt2bin.handleProgram({
     boilerplate
     --version                           Show version of your program
     --help                              show help o your program (See showusage)
+    
+So you don t need to care about those.
+
+# comprehensive workflow
+
+To help you to build and check your workflow and its configuration,
+you are invited to use `--describe [some]` option
+
+```
+[the program name] --describe [some string pattern]
+```
+
+Which would display something similar to this
+```
+sh> project-node --describe check_auth
+
+PROJECT-BIN-NODE
+bin helper to initialize a node project.
+
+Tasks details for check_auth:
+
+ -  Task CHECK_AUTH
+    Ensure the various auth mechanism involved works properly 
+    before anything is started.
+    This task is an alias of
+      - githubauth:svcs_check_auth
+
+    Target GITHUBAUTH:SVCS_CHECK_AUTH
+        "options": {
+          "auth": {
+            "type": "oauth",
+            "token": "*****"
+          },
+          "config": {
+            "version": "3.0.0"
+          }
+        }
+
+```
+
+# per folder configuration
+
+To properly initialize a per folder program configuration file of a program implementing `grunt2bin`,
+please use this command
+
+```
+[the program name] --edit [mine]
+```
+
+This will create a proper file to put your changes and update.
+
+
 
 # examples
 
