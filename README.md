@@ -10,7 +10,7 @@ Let `grunt2bin` provides the interfaces required by your end user to hack and co
 
 Configuration and workflow can be overridden per folder and or per system user.
 
-# usage
+## usage
 
 Install grunt2bin as local dependency of your module.
 
@@ -50,7 +50,7 @@ grunt2bin.handleProgram({
 })
 ```
 
-# pre defined command line arguments
+## pre defined command line arguments
 
 `grunt2bin` handles several command line arguments out of the box.
 
@@ -71,7 +71,7 @@ grunt2bin.handleProgram({
     
 So you don t need to care about those.
 
-# comprehensive workflow
+## comprehensive workflow
 
 To help you to build and check your workflow and its configuration,
 you are invited to use `--describe [some]` option
@@ -108,7 +108,7 @@ Tasks details for check_auth:
 
 ```
 
-# per folder configuration
+## per folder configuration
 
 To properly initialize a per folder program configuration file of a program implementing `grunt2bin`,
 please use this command
@@ -121,7 +121,7 @@ This will create a proper file to put your changes and update.
 
 
 
-# examples
+## examples
 
 - https://github.com/maboiteaspam/hello-grunt2bin
 - https://github.com/maboiteaspam/project-bin-node/tree/grunt2bin
