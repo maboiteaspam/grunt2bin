@@ -46,8 +46,10 @@ function Program () {
 function handleProgram  (program) {
   var cwd = process.cwd()
 
-  // load grunt and the tasks local to this module, if any.
+  // get a grunt instance
   var grunt = require('grunt')
+
+  // load grunt and the tasks local to this module, if any.
   if (fs.existsSync (path.join(__dirname, 'tasks')))
     grunt.loadTasks(path.join(__dirname, 'tasks'))
 
@@ -165,7 +167,7 @@ function handleProgram  (program) {
       }
       if (what.match(/run/)) {
         systemUserGrunt && grunt.file.setBase(path.dirname(systemUserGruntfile))
-        systemUserGrunt && systemUserGrunt.run && systemUserGrunt.run(main, grunt, cwd)
+        systemUserGrunt && systemUserGrunt.run && systemUserGrunt.run(main, grunt, cwd, TasksWorkflow)
         grunt.file.setBase(path.dirname(userGruntfile))
       }
     }
@@ -200,7 +202,7 @@ function handleProgram  (program) {
   // to execute smoothly.
   // the execution of the workflow is delayed to later
   // and is entirely done by grunt.
-  program.run(main, grunt, cwd)
+  program.run(main, grunt, cwd, TasksWorkflow)
 
   // if there is no user grunt file within cwd
   // to possibly invoke the run handle of the system user file,
@@ -211,7 +213,7 @@ function handleProgram  (program) {
     // otherwise, up to the userGrunt to run it, or not.
   } else if (userGrunt.run) {
     grunt.file.setBase(path.dirname(userGruntfile)) // needed ?
-    userGrunt.run(main, grunt, cwd)
+    userGrunt.run(main, grunt, cwd, TasksWorkflow)
   }
 
   grunt.file.setBase(moduleLocation || caller) // needed ?
