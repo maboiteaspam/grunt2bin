@@ -75,8 +75,6 @@ function handleProgram  (program) {
 
   // we starts and editor,
   // to edit a Gruntfile
-  // if it does not exists,
-  // create it at first.
   if (argv.edit) {
     var pathToEdit = path.join(cwd, userGruntfileName)
     if ((argv.edit + '').match(/mine/)) {
@@ -85,6 +83,8 @@ function handleProgram  (program) {
       pathToEdit = path.join(pathToEdit, 'index.js')
     }
 
+    // if it does not exists,
+    // create it at first.
     if (!fs.existsSync(pathToEdit)) {
       var content = fs.readFileSync(path.join(__dirname, 'index-tpl.js')).toString()
       var v = semver.major(modulePkg.version) + '.' + semver.minor(modulePkg.version) + '.x'

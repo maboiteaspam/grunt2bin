@@ -25,12 +25,13 @@ var grunt2bin = require('grunt2bin')
 
 grunt2bin.handleProgram({
 
-  compat: '1.x.x',
+  // handleProgram expects
+  // an Object with three keys.
 
-  // This function expects
-  // an Object with two keys.
+  // compatible version with your program
+  compat: '1.x.x',
   
-  // config: To initialize the grunt config
+  // grunt config to initialize or update
   config: function(grunt, cwd){
     grunt.initConfig({
       'user': ''
@@ -40,13 +41,13 @@ grunt2bin.handleProgram({
     grunt.setUserGruntfile('grunt-hello.js')
   },
   
-  // run: To initialize the tasks workflow.
+  // grunt tasks workflow to build
   run: function(main, grunt, cwd, TasksWorkflow){
     TasksWorkflow()
       .appendTask( TasksWorkflow.createTask('confirm_username'))
       .appendTask( TasksWorkflow.createTask('hello'))
       .packToTask('welcome',
-      'Welcome user needs to get his user name first !`.'
+      'This task inquire user to confirm the user name to use, then say hello.'
     ).appendTo(main);
   }
 })
