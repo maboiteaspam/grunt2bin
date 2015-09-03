@@ -126,8 +126,6 @@ function handleProgram  (program) {
   grunt.file.setBase(moduleLocation || caller)
   program.config(grunt, cwd)
 
-  grunt.setUserGruntfile = null; // ? can do that ?
-
 
   // Additionally, grunt2bin can help you to load
   // a file located in the system user folder,

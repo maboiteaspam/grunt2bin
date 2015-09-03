@@ -22,6 +22,7 @@ For each `binary` where you want to use `grunt`
 #!/usr/bin/env node
 
 var grunt2bin = require('grunt2bin')
+var TasksWorkflow = grunt2bin.TasksWorkflow
 
 grunt2bin.handleProgram({
 
@@ -35,11 +36,10 @@ grunt2bin.handleProgram({
     })
     // load my super tasks
     grunt.loadTasks('tasks')
-    grunt.setUserGruntfile('grunt-hello.js')
   },
   
   // grunt tasks workflow to build
-  run: function(main, grunt, cwd, TasksWorkflow){
+  run: function(main){
     TasksWorkflow()
       .appendTask( TasksWorkflow.createTask('confirm_username'))
       .appendTask( TasksWorkflow.createTask('hello'))
