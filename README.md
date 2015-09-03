@@ -57,13 +57,20 @@ grunt2bin.handleProgram({
 
 `grunt2bin` handles several command line arguments out of the box.
 
+    grunt2bin
     --describe [task / target name]     Show help and description about tasks.
     --only [task name]                  Keep tasks that match given name.
     --edit [mine|this]                  Starts an editor to edit the Gruntfile 
                                         located in $HOME or the cwd.
+    
+    Grunt
     --verbose                           Configure grunt verbosity
     --debug                             Configure grunt to more verbosity
     --force                             Force grunt to keep going on error
+    
+    boilerplate
+    --version                           Show version of your program
+    --help                              show help o your program (See showusage)
 
 # examples
 

@@ -62,6 +62,15 @@ function handleProgram  (program) {
 
   var userGruntfileName = modulePkg.name + '.js'
 
+  // handle help and version command line arguments
+  if(argv.version){
+    return console.log('%s %s', pkg.name, pkg.version);
+  }
+
+  if(argv.help){
+    return showusage(moduleLocation, modulePkg.name, 'Usage')
+  }
+
   // we starts and editor,
   // to edit a Gruntfile
   // if it does not exists,
@@ -82,8 +91,7 @@ function handleProgram  (program) {
       fs.writeFileSync(pathToEdit, content.replace('x.x.x', v))
     }
 
-    editors(pathToEdit, function (code, sig) {});
-    return;
+    return editors(pathToEdit, function (code, sig) {});
   }
 
   // this is a stub for grunt.
